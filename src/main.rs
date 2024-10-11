@@ -2,7 +2,9 @@ use actix_cors::Cors;
 use actix_web::{get, http, App, HttpResponse, HttpServer, Responder};
 
 pub mod chat_connectivity;
-mod chat_users;
+pub mod chat_users;
+pub mod models;
+pub mod schema;
 #[get("/test")]
 pub async fn testing_if_it_works() -> impl Responder {
     HttpResponse::Ok().body("This is just a test to see if the api works")
