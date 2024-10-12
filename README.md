@@ -1,3 +1,7 @@
 Actix web server backend chat application server
 To run it you need to have rust installed in your computer
-Cargo run => Opens the server which sends api's to the front end based on the allowed methods on the chat application.
+locally, it runs on http://127.0.0.1:8080
+Cargo run => to start the server on port 8080
+Cargo doc => to produce the documentation
+cargo doc --open => produce documentation and open it in the browser
+
