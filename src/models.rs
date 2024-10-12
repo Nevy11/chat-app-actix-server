@@ -3,11 +3,28 @@ use diesel::{
     prelude::{Insertable, Queryable},
     Selectable,
 };
+use serde::Deserialize;
 
-#[derive(Insertable, Selectable, Queryable)]
+#[derive(Insertable, Selectable, Queryable, Deserialize)]
 #[diesel(table_name = crate::schema::chat_users_table)]
 #[diesel(check_for_backend(Pg))]
 pub struct ChatUsers {
     pub username: String,
     pub userpassword: String,
+    pub email: String,
+}
+
+#[derive(Insertable, Selectable, Queryable, Deserialize)]
+#[diesel(table_name = crate::schema::chat_users_table)]
+#[diesel(check_for_backend(Pg))]
+pub struct LoginChatUsers {
+    pub username: String,
+    pub userpassword: String,
+}
+
+#[derive(Deserialize)]
+pub struct UpdateUserPassword {
+    pub username: String,
+    pub current_password: String,
+    pub new_password: String,
 }

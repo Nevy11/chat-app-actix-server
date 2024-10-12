@@ -4,5 +4,6 @@ diesel::table! {
     chat_users_table (username) {
         username -> Varchar,
         userpassword -> Varchar,
+        email -> Varchar,
     }
 }

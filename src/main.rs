@@ -1,15 +1,78 @@
 use actix_cors::Cors;
-use actix_web::{get, http, App, HttpResponse, HttpServer, Responder};
+use actix_web::{
+    delete, get, http, patch, post, web::Json, App, HttpResponse, HttpServer, Responder,
+};
+use chat_users::{
+    create_chat_user::create_chat_user, delete_chat_user::delete_chat_user,
+    read_chat_user::check_for_users_password, update_chat_user::update_chat_user,
+};
+use models::{ChatUsers, LoginChatUsers, UpdateUserPassword};
 
 pub mod chat_connectivity;
 pub mod chat_users;
 pub mod models;
 pub mod schema;
-#[get("/test")]
-pub async fn testing_if_it_works() -> impl Responder {
-    HttpResponse::Ok().body("This is just a test to see if the api works")
+
+#[post("/sign_up_user")]
+pub async fn sign_up_user(data: Json<ChatUsers>) -> impl Responder {
+    let data_to_create = ChatUsers {
+        username: data.username.clone(),
+        userpassword: data.userpassword.clone(),
+        email: data.email.clone(),
+    };
+    let created_result = create_chat_user(data_to_create);
+    match created_result {
+        Ok(created_data) => {
+            HttpResponse::Ok().body(format!("Created: {} successfully", created_data.username))
+        }
+        Err(e) => HttpResponse::Ok().body(format!("{e:?}")),
+    }
 }
-#[actix_web::main]
+
+#[get("/login_user")]
+pub async fn login_user(data: Json<LoginChatUsers>) -> impl Responder {
+    let login_result = check_for_users_password(data.username.clone(), data.userpassword.clone());
+    match login_result {
+        true => HttpResponse::Ok().body("true"),
+        false => HttpResponse::Ok().body("false"),
+    }
+}
+
+#[patch("/update_user_password")]
+pub async fn update_user_password(data: Json<UpdateUserPassword>) -> impl Responder {
+    let field = String::from("userpassword");
+    let islogged = check_for_users_password(
+        data.username.to_uppercase().clone(),
+        data.current_password.clone(),
+    );
+    if islogged {
+        let udpated_result =
+            update_chat_user(data.username.clone(), data.new_password.clone(), field);
+        match udpated_result {
+            Some(Ok(updated_data)) => HttpResponse::Ok().body(format!(
+                "user {} password is updated successfully",
+                updated_data.username
+            )),
+            Some(Err(e)) => HttpResponse::Ok().body(format!("{e:?}")),
+            None => HttpResponse::Ok().body("Please enter a valid field, =>  userpassword "),
+        }
+    } else {
+        HttpResponse::Ok().body("Incorrect current password")
+    }
+}
+
+#[delete("/delete_user")]
+pub async fn delete_user(data: Json<UpdateUserPassword>) -> impl Responder {
+    let deleted_result = delete_chat_user(data.username.to_uppercase().clone());
+    match deleted_result {
+        Ok(deleted_data) => {
+            HttpResponse::Ok().body(format!("Deleted: {:?} successfully", deleted_data.username))
+        }
+        Err(e) => HttpResponse::Ok().body(format!("{e:?}")),
+    }
+}
+
+#[tokio::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
@@ -23,7 +86,9 @@ async fn main() -> std::io::Result<()> {
                     ])
                     .max_age(3600),
             )
-            .service(testing_if_it_works)
+            .service(sign_up_user)
+            .service(login_user)
+            .service(update_user_password)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
