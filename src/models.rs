@@ -3,7 +3,7 @@ use diesel::{
     prelude::{Insertable, Queryable},
     Selectable,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Insertable, Selectable, Queryable, Deserialize, Debug)]
 #[diesel(table_name = crate::schema::chat_users_table)]
@@ -27,4 +27,9 @@ pub struct UpdateUserPassword {
     pub username: String,
     pub current_password: String,
     pub new_password: String,
+}
+
+#[derive(Serialize)]
+pub struct MessageResponse {
+    pub message: String,
 }

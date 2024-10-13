@@ -8,7 +8,7 @@ use chat_users::{
     read_chat_user::{check_for_users_password, read_all_chat_user},
     update_chat_user::update_chat_user,
 };
-use models::{ChatUsers, LoginChatUsers, UpdateUserPassword};
+use models::{ChatUsers, LoginChatUsers, MessageResponse, UpdateUserPassword};
 
 pub mod chat_connectivity;
 pub mod chat_users;
@@ -25,9 +25,18 @@ pub async fn sign_up_user(data: Json<ChatUsers>) -> impl Responder {
     let created_result = create_chat_user(data_to_create);
     match created_result {
         Ok(created_data) => {
-            HttpResponse::Ok().body(format!("Created: {} successfully", created_data.username))
+            println!("Created: {:?} successfully", created_data.username);
+            let return_message = MessageResponse {
+                message: format!("true"),
+            };
+            HttpResponse::Ok().json(return_message)
         }
-        Err(e) => HttpResponse::Ok().body(format!("{e:?}")),
+        Err(e) => {
+            let return_message = MessageResponse {
+                message: e.to_string(),
+            };
+            HttpResponse::Ok().json(return_message)
+        }
     }
 }
 
