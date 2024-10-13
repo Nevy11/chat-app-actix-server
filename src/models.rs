@@ -5,7 +5,7 @@ use diesel::{
 };
 use serde::Deserialize;
 
-#[derive(Insertable, Selectable, Queryable, Deserialize)]
+#[derive(Insertable, Selectable, Queryable, Deserialize, Debug)]
 #[diesel(table_name = crate::schema::chat_users_table)]
 #[diesel(check_for_backend(Pg))]
 pub struct ChatUsers {

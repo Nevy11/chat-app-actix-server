@@ -3,8 +3,10 @@ use actix_web::{
     delete, get, http, patch, post, web::Json, App, HttpResponse, HttpServer, Responder,
 };
 use chat_users::{
-    create_chat_user::create_chat_user, delete_chat_user::delete_chat_user,
-    read_chat_user::check_for_users_password, update_chat_user::update_chat_user,
+    create_chat_user::create_chat_user,
+    delete_chat_user::delete_chat_user,
+    read_chat_user::{check_for_users_password, read_all_chat_user},
+    update_chat_user::update_chat_user,
 };
 use models::{ChatUsers, LoginChatUsers, UpdateUserPassword};
 
@@ -74,6 +76,15 @@ pub async fn delete_user(data: Json<UpdateUserPassword>) -> impl Responder {
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    let all_result = read_all_chat_user();
+    match all_result {
+        Ok(result) => {
+            println!("{result:?}");
+        }
+        Err(e) => {
+            println!("{e:?}")
+        }
+    }
     HttpServer::new(|| {
         App::new()
             .wrap(
