@@ -1,7 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{
-    delete, get, http, patch, post, web::Json, App, HttpResponse, HttpServer, Responder,
-};
+use actix_web::{delete, http, patch, post, web::Json, App, HttpResponse, HttpServer, Responder};
 use chat_users::{
     create_chat_user::create_chat_user,
     delete_chat_user::delete_chat_user,
@@ -18,9 +16,9 @@ pub mod schema;
 #[post("/sign_up_user")]
 pub async fn sign_up_user(data: Json<ChatUsers>) -> impl Responder {
     let data_to_create = ChatUsers {
-        username: data.username.clone(),
+        username: data.username.clone().to_uppercase(),
         userpassword: data.userpassword.clone(),
-        email: data.email.clone(),
+        email: data.email.clone().to_uppercase(),
     };
     let created_result = create_chat_user(data_to_create);
     match created_result {
@@ -40,12 +38,22 @@ pub async fn sign_up_user(data: Json<ChatUsers>) -> impl Responder {
     }
 }
 
-#[get("/login_user")]
+#[post("/login_user")]
 pub async fn login_user(data: Json<LoginChatUsers>) -> impl Responder {
     let login_result = check_for_users_password(data.username.clone(), data.userpassword.clone());
     match login_result {
-        true => HttpResponse::Ok().body("true"),
-        false => HttpResponse::Ok().body("false"),
+        true => {
+            let return_message = MessageResponse {
+                message: String::from("true"),
+            };
+            HttpResponse::Ok().json(return_message)
+        }
+        false => {
+            let return_message = MessageResponse {
+                message: String::from("false"),
+            };
+            HttpResponse::Ok().json(return_message)
+        }
     }
 }
 
@@ -99,6 +107,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(
                 Cors::default()
                     .allowed_origin("http://localhost:4200")
+                    .allowed_origin("http://192.168.137.210:10000")
                     .allowed_methods(vec!["GET", "POST", "DELETE", "PATCH"])
                     .allowed_headers(vec![
                         http::header::AUTHORIZATION,
